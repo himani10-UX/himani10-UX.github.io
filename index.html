@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Tasks</title>
+  <style>
+    :root {
+      --bg-start: #667eea;
+      --bg-end: #764ba2;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --text: #1e1b4b;
+      --line: #e5e7eb;
+      --high: #ef4444;
+      --medium: #f59e0b;
+      --low: #22c55e;
+      --high-bg: #fef2f2;
+      --medium-bg: #fffbeb;
+      --low-bg: #f0fdf4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      color: #fff;
+      font-size: 28px;
+      margin: 0;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      margin: 6px 0 0;
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .progress-title {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .progress-pct {
+      font-weight: 700;
+      color: var(--bg-start);
+      font-size: 18px;
+    }
+
+    .progress-track {
+      margin-top: 10px;
+      background: var(--line);
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--bg-start), var(--bg-end));
+      transition: width 0.4s ease;
+    }
+
+    .meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    button {
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+    }
+
+    .add-toggle {
+      width: 100%;
+      padding: 14px;
+      border: 2px dashed #a5b4fc;
+      border-radius: 12px;
+      color: var(--bg-start);
+      background: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .form-title {
+      margin: 0 0 16px;
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .error {
+      color: var(--high);
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+
+    .fields {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: linear-gradient(90deg, var(--bg-start), var(--bg-end));
+      color: #fff;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      background: #f3f4f6;
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .filter-btn {
+      flex: 1;
+      padding: 9px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+      background: #fff;
+      color: var(--bg-start);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .empty {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .task {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all 0.2s;
+      border-left: 4px solid var(--medium);
+    }
+
+    .task.done {
+      background: #f9fafb;
+      opacity: 0.7;
+      border-left-color: #d1d5db;
+    }
+
+    .toggle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      margin-top: 2px;
+      border: 2px solid var(--medium);
+      background: #fff;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .toggle.done {
+      border-color: var(--low);
+      background: var(--low);
+    }
+
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .title.done {
+      color: #9ca3af;
+      text-decoration: line-through;
+    }
+
+    .chips {
+      margin-top: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .chip {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .chip-subject { background: #ede9fe; color: #7c3aed; }
+    .chip-high { background: var(--high-bg); color: var(--high); }
+    .chip-medium { background: var(--medium-bg); color: var(--medium); }
+    .chip-low { background: var(--low-bg); color: var(--low); }
+    .chip-overdue { background: #fff3f3; color: var(--high); }
+    .chip-today { background: #fffbeb; color: var(--medium); }
+    .chip-date { color: #9ca3af; font-size: 11px; padding: 2px 0; }
+
+    .remove {
+      background: none;
+      color: #d1d5db;
+      font-size: 18px;
+      line-height: 1;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 520px) {
+      .fields { flex-direction: column; gap: 0; margin-bottom: 0; }
+      .actions { flex-direction: column; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>📚 Student Tasks</h1>
+      <p class="subtitle">Stay on top of your assignments</p>
+    </header>
+
+    <section class="card">
+      <div class="row">
+        <span class="progress-title">Overall Progress</span>
+        <span class="progress-pct" id="pct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="row meta">
+        <span id="completedMeta">0 completed</span>
+        <span id="remainingMeta">0 remaining</span>
+      </div>
+    </section>
+
+    <button class="add-toggle" id="showFormBtn">+ Add New Task</button>
+
+    <section class="card hidden" id="formCard">
+      <h3 class="form-title">New Task</h3>
+      <div class="error hidden" id="error"></div>
+      <input id="title" placeholder="Task title *" />
+      <input id="subject" placeholder="Subject / Course" />
+
+      <div class="fields">
+        <div class="field">
+          <label for="due">Due Date</label>
+          <input id="due" type="date" />
+        </div>
+        <div class="field">
+          <label for="priority">Priority</label>
+          <select id="priority">
+            <option>High</option>
+            <option selected>Medium</option>
+            <option>Low</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="addTaskBtn">Add Task</button>
+        <button class="btn-secondary" id="cancelBtn">Cancel</button>
+      </div>
+    </section>
+
+    <section class="filters">
+      <button class="filter-btn active" data-filter="All">All</button>
+      <button class="filter-btn" data-filter="Active">Active</button>
+      <button class="filter-btn" data-filter="Completed">Completed</button>
+    </section>
+
+    <section class="task-list" id="taskList"></section>
+  </div>
+
+  <script>
+    const PRIORITY_ORDER = { High: 0, Medium: 1, Low: 2 };
+    const PRIORITY_COLORS = { High: "#ef4444", Medium: "#f59e0b", Low: "#22c55e" };
+    const STATUS_LABEL = { overdue: "⚠️ Overdue", today: "📅 Due Today", upcoming: null };
+
+    const els = {
+      pct: document.getElementById("pct"),
+      progressFill: document.getElementById("progressFill"),
+      completedMeta: document.getElementById("completedMeta"),
+      remainingMeta: document.getElementById("remainingMeta"),
+      showFormBtn: document.getElementById("showFormBtn"),
+      formCard: document.getElementById("formCard"),
+      error: document.getElementById("error"),
+      title: document.getElementById("title"),
+      subject: document.getElementById("subject"),
+      due: document.getElementById("due"),
+      priority: document.getElementById("priority"),
+      addTaskBtn: document.getElementById("addTaskBtn"),
+      cancelBtn: document.getElementById("cancelBtn"),
+      taskList: document.getElementById("taskList")
+    };
+
+    let tasks = loadTasks();
+    let filter = "All";
+    let showForm = false;
+
+    function loadTasks() {
+      try {
+        const raw = localStorage.getItem("student_tasks");
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveTasks() {
+      try {
+        localStorage.setItem("student_tasks", JSON.stringify(tasks));
+      } catch {}
+    }
+
+    function getStatus(due) {
+      if (!due) return null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dueDate = new Date(due);
+      dueDate.setHours(0, 0, 0, 0);
+      if (dueDate < today) return "overdue";
+      if (dueDate.getTime() === today.getTime()) return "today";
+      return "upcoming";
+    }
+
+    function formatDate(due) {
+      return new Date(due + "T00:00:00").toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric"
+      });
+    }
+
+    function setFormVisible(visible) {
+      showForm = visible;
+      els.formCard.classList.toggle("hidden", !visible);
+      els.showFormBtn.classList.toggle("hidden", visible);
+      if (!visible) clearError();
+    }
+
+    function clearError() {
+      els.error.textContent = "";
+      els.error.classList.add("hidden");
+    }
+
+    function setError(msg) {
+      els.error.textContent = msg;
+      els.error.classList.remove("hidden");
+    }
+
+    function resetForm() {
+      els.title.value = "";
+      els.subject.value = "";
+      els.due.value = "";
+      els.priority.value = "Medium";
+    }
+
+    function addTask() {
+      const title = els.title.value.trim();
+      if (!title) {
+        setError("Please enter a task title.");
+        return;
+      }
+
+      tasks.push({
+        id: Date.now(),
+        title,
+        subject: els.subject.value.trim(),
+        due: els.due.value,
+        priority: els.priority.value,
+        done: false
+      });
+      saveTasks();
+      resetForm();
+      clearError();
+      setFormVisible(false);
+      render();
+    }
+
+    function toggleTask(id) {
+      tasks = tasks.map((task) => task.id === id ? { ...task, done: !task.done } : task);
+      saveTasks();
+      render();
+    }
+
+    function removeTask(id) {
+      tasks = tasks.filter((task) => task.id !== id);
+      saveTasks();
+      render();
+    }
+
+    function getFilteredTasks() {
+      return tasks
+        .filter((task) => {
+          if (filter === "Active") return !task.done;
+          if (filter === "Completed") return task.done;
+          return true;
+        })
+        .sort((a, b) => {
+          if (a.done !== b.done) return a.done ? 1 : -1;
+          return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
+        });
+    }
+
+    function renderProgress() {
+      const total = tasks.length;
+      const completed = tasks.filter((task) => task.done).length;
+      const pct = total ? Math.round((completed / total) * 100) : 0;
+      els.pct.textContent = pct + "%";
+      els.progressFill.style.width = pct + "%";
+      els.completedMeta.textContent = completed + " completed";
+      els.remainingMeta.textContent = (total - completed) + " remaining";
+    }
+
+    function renderFilters() {
+      document.querySelectorAll(".filter-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.filter === filter);
+      });
+    }
+
+    function renderTasks() {
+      const list = getFilteredTasks();
+      if (!list.length) {
+        els.taskList.innerHTML = [
+          '<div class="empty">',
+          '<div class="empty-icon">🎉</div>',
+          "<div>" + (filter === "Completed" ? "No completed tasks yet." : "No tasks here!") + "</div>",
+          "</div>"
+        ].join("");
+        return;
+      }
+
+      els.taskList.innerHTML = list.map((task) => {
+        const status = getStatus(task.due);
+        const priorityClass = task.priority.toLowerCase();
+        const dueChip = task.due && STATUS_LABEL[status]
+          ? '<span class="chip chip-' + status + '">' + STATUS_LABEL[status] + "</span>"
+          : "";
+        const dueDateText = task.due && status === "upcoming"
+          ? '<span class="chip-date">📅 Due: ' + formatDate(task.due) + "</span>"
+          : "";
+
+        return [
+          '<article class="task ' + (task.done ? "done" : "") + '" style="border-left-color:' + (task.done ? "#d1d5db" : PRIORITY_COLORS[task.priority]) + '">',
+          '<button class="toggle ' + (task.done ? "done" : "") + '" data-action="toggle" data-id="' + task.id + '" style="border-color:' + (task.done ? "#22c55e" : PRIORITY_COLORS[task.priority]) + '">' + (task.done ? "✓" : "") + "</button>",
+          '<div class="content">',
+          '<div class="title ' + (task.done ? "done" : "") + '">' + escapeHtml(task.title) + "</div>",
+          '<div class="chips">',
+          task.subject ? '<span class="chip chip-subject">' + escapeHtml(task.subject) + "</span>" : "",
+          '<span class="chip chip-' + priorityClass + '">Priority: ' + task.priority + "</span>",
+          dueChip,
+          dueDateText,
+          "</div>",
+          "</div>",
+          '<button class="remove" data-action="remove" data-id="' + task.id + '">×</button>',
+          "</article>"
+        ].join("");
+      }).join("");
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function render() {
+      renderProgress();
+      renderFilters();
+      renderTasks();
+    }
+
+    els.showFormBtn.addEventListener("click", () => setFormVisible(true));
+    els.cancelBtn.addEventListener("click", () => setFormVisible(false));
+    els.addTaskBtn.addEventListener("click", addTask);
+
+    document.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    els.taskList.addEventListener("click", (e) => {
+      const target = e.target.closest("button[data-action]");
+      if (!target) return;
+      const id = Number(target.dataset.id);
+      if (target.dataset.action === "toggle") toggleTask(id);
+      if (target.dataset.action === "remove") removeTask(id);
+    });
+
+    render();
+  </script>
+</body>
+</html>
